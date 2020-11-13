@@ -1,7 +1,9 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import * as Yup from 'yup'
+
+import { app } from '../base'
 
 import { makeStyles } from '@material-ui/core/styles'
 import TextField from '@material-ui/core/TextField'
@@ -55,15 +57,38 @@ export default function AddBookForm () {
     mode: 'onBlur'
   })
 
+  const [coverPhotoUrl, setCoverPhotoUrl] = useState(``)
+
+  const onFileChange = e => {
+    const file = e.target.files[0]
+
+    const storageRef = app.storage().ref()
+
+    const fileRef = storageRef.child(file.name)
+    fileRef.put(file).then(() => {
+      console.log(`file uploaded`)
+      app
+        .storage()
+        .ref(file.name)
+        .getDownloadURL()
+        .then(url => {
+          setCoverPhotoUrl(url)
+        })
+    })
+  }
+
+  const onSubmit = data => {
+    data['sku'] = 'No SKU'
+    data['coverPhoto'] = coverPhotoUrl
+    console.log(data)
+  }
+
   return (
     <form
       noValidate
       autoComplete='off'
       className={classes.formContainer}
-      onSubmit={handleSubmit(data => {
-        data['sku'] = 'No SKU'
-        console.log(data)
-      })}
+      onSubmit={handleSubmit(onSubmit)}
     >
       <Grid container>
         <Grid item xs={12} md={8}>
@@ -185,6 +210,7 @@ export default function AddBookForm () {
                     name='coverPhoto'
                     ref={register}
                     type='file'
+                    onChange={onFileChange}
                   />
                 </Button>
               </label>
@@ -195,7 +221,7 @@ export default function AddBookForm () {
           <div style={{ maxWidth: '100%', padding: '0 20px' }}>
             <img
               className={classes.coverImg}
-              src={`http://lorempixel.com/300/400`}
+              src={coverPhotoUrl || `http://lorempixel.com/300/400`}
               alt={`Book cover`}
             />
           </div>
