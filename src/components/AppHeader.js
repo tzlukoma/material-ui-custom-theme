@@ -28,7 +28,7 @@ export default function AppHeader () {
         <Toolbar>
           <LibraryBooksIcon style={{ paddingRight: 5 }} />
           <Typography variant='h6' className={classes.title}>
-            BKR Connect
+            BKR CONNECT
           </Typography>
           <Button color='inherit' variant='outlined'>
             Login

@@ -6,6 +6,8 @@ import Typography from '@material-ui/core/Typography'
 import Container from '@material-ui/core/Container'
 import { makeStyles } from '@material-ui/core/styles'
 import AppHeader from './components/AppHeader'
+import AddBookForm from './components/AddBookForm'
+import { Grid, Paper } from '@material-ui/core'
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -79,6 +81,14 @@ function App () {
       <ThemeProvider theme={theme}>
         <CssBaseline>
           <AppHeader />
+          <Container style={{ padding: 20 }}>
+            <Grid container spacing={3}>
+              <Grid item xs={12}>
+                <Typography variant='h3'>Add a book:</Typography>
+                <AddBookForm />
+              </Grid>
+            </Grid>
+          </Container>
         </CssBaseline>
       </ThemeProvider>
     </div>
