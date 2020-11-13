@@ -1,10 +1,11 @@
 import React from 'react'
 import { useForm, Controller } from 'react-hook-form'
+import { yupResolver } from '@hookform/resolvers/yup'
+import * as Yup from 'yup'
 
 import { makeStyles } from '@material-ui/core/styles'
 import TextField from '@material-ui/core/TextField'
 import FormControl from '@material-ui/core/FormControl'
-import FormHelperText from '@material-ui/core/FormHelperText'
 import InputLabel from '@material-ui/core/InputLabel'
 import Grid from '@material-ui/core/Grid'
 import Select from '@material-ui/core/Select'
@@ -36,10 +37,23 @@ const useStyles = makeStyles(theme => ({
   }
 }))
 
+const schema = Yup.object().shape({
+  bookName: Yup.string().required(`Please enter the name of the book`),
+  author: Yup.string().required(`Please enter the author's name`),
+  gender: Yup.string().required(`Please select a gender`),
+  amountBought: Yup.number('Please enter number')
+    .positive('Please enter a positive number')
+    .integer('Please enter a number')
+    .required('Amount bought is required')
+})
+
 export default function AddBookForm () {
   const classes = useStyles()
 
-  const { register, handleSubmit, control } = useForm()
+  const { register, handleSubmit, control, errors } = useForm({
+    resolver: yupResolver(schema),
+    mode: 'onBlur'
+  })
 
   return (
     <form
@@ -58,9 +72,12 @@ export default function AddBookForm () {
               <FormControl className={classes.formControl}>
                 <TextField
                   name='bookName'
+                  id='bookName'
                   label='Book Name'
                   variant='outlined'
                   inputRef={register}
+                  error={!!errors.bookName}
+                  helperText={errors?.bookName?.message}
                 />
               </FormControl>
             </Grid>
@@ -71,6 +88,8 @@ export default function AddBookForm () {
                   label='Author'
                   variant='outlined'
                   inputRef={register}
+                  error={!!errors.author}
+                  helperText={errors?.author?.message}
                 />
               </FormControl>
             </Grid>
@@ -85,7 +104,11 @@ export default function AddBookForm () {
                   name='gender'
                   control={control}
                   as={
-                    <Select label='Gender'>
+                    <Select
+                      label='Gender'
+                      error={!!errors.gender}
+                      helperText={errors?.gender?.message}
+                    >
                       <MenuItem value=''>
                         <em>None</em>
                       </MenuItem>
@@ -120,6 +143,7 @@ export default function AddBookForm () {
             <Grid item xs={12} lg={3}>
               <FormControl className={classes.formControl}>
                 <TextField
+                  error
                   name='sku'
                   label='SKU'
                   variant='outlined'
@@ -147,21 +171,21 @@ export default function AddBookForm () {
               </FormControl>
             </Grid>
             <Grid item xs={12}>
-              <label htmlFor='upload-photo'>
-                <input
-                  style={{ display: 'none' }}
-                  id='upload-photo'
-                  name='upload-photo'
-                  type='file'
-                />
-
+              <label htmlFor='coverPhoto'>
                 <Button
                   color='secondary'
                   variant='contained'
-                  component='span'
+                  component='label'
                   style={{ marginBottom: 20 }}
                 >
                   Upload Cover Picture
+                  <input
+                    hidden
+                    id='coverPhoto'
+                    name='coverPhoto'
+                    ref={register}
+                    type='file'
+                  />
                 </Button>
               </label>
             </Grid>
