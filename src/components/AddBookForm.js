@@ -1,4 +1,6 @@
 import React from 'react'
+import { useForm, Controller } from 'react-hook-form'
+
 import { makeStyles } from '@material-ui/core/styles'
 import TextField from '@material-ui/core/TextField'
 import FormControl from '@material-ui/core/FormControl'
@@ -20,92 +22,110 @@ const useStyles = makeStyles(theme => ({
     root: {
       width: '100%'
     }
+  },
+  formContainer: {
+    padding: 12
+  },
+  formControl: {
+    width: '100%'
+  },
+  coverImg: {
+    width: '90%',
+    margin: 'auto',
+    display: 'block'
   }
 }))
 
 export default function AddBookForm () {
   const classes = useStyles()
 
+  const { register, handleSubmit, control } = useForm()
+
   return (
-    <form noValidate autoComplete='off' style={{ padding: 12 }}>
+    <form
+      noValidate
+      autoComplete='off'
+      className={classes.formContainer}
+      onSubmit={handleSubmit(data => {
+        data['sku'] = 'No SKU'
+        console.log(data)
+      })}
+    >
       <Grid container>
         <Grid item xs={12} md={8}>
           <Grid container alignItems='flex-start' spacing={3}>
             <Grid item xs={12} sm={6}>
-              <FormControl style={{ width: '100%' }}>
+              <FormControl className={classes.formControl}>
                 <TextField
-                  id='outlined-basic'
+                  name='bookName'
                   label='Book Name'
                   variant='outlined'
+                  inputRef={register}
                 />
               </FormControl>
             </Grid>
             <Grid item xs={12} sm={6}>
-              <FormControl style={{ width: '100%' }}>
+              <FormControl className={classes.formControl}>
                 <TextField
-                  id='outlined-basic'
+                  name='author'
                   label='Author'
                   variant='outlined'
+                  inputRef={register}
                 />
               </FormControl>
             </Grid>
           </Grid>
           <Grid container spacing={3}>
             <Grid item xs={12} sm={6} lg={3}>
-              <FormControl
-                variant='outlined'
-                className={classes.formControl}
-                style={{ width: '100%' }}
-              >
+              <FormControl variant='outlined' className={classes.formControl}>
                 <InputLabel id='demo-simple-select-outlined-label'>
                   Gender
                 </InputLabel>
-                <Select
-                  labelId='demo-simple-select-outlined-label'
-                  id='demo-simple-select-outlined'
-                  label='Gender'
-                >
-                  <MenuItem value=''>
-                    <em>None</em>
-                  </MenuItem>
-                  <MenuItem value={`Boys`}>Boys</MenuItem>
-                  <MenuItem value={`Girls`}>Girls</MenuItem>
-                  <MenuItem value={`Both`}>Both</MenuItem>
-                </Select>
+                <Controller
+                  name='gender'
+                  control={control}
+                  as={
+                    <Select label='Gender'>
+                      <MenuItem value=''>
+                        <em>None</em>
+                      </MenuItem>
+                      <MenuItem value={`Boys`}>Boys</MenuItem>
+                      <MenuItem value={`Girls`}>Girls</MenuItem>
+                      <MenuItem value={`Both`}>Both</MenuItem>
+                    </Select>
+                  }
+                />
               </FormControl>
             </Grid>
             <Grid item xs={12} sm={6} lg={3}>
-              <FormControl
-                variant='outlined'
-                className={classes.formControl}
-                style={{ width: '100%' }}
-              >
-                <InputLabel id='demo-simple-select-outlined-label'>
-                  Age
-                </InputLabel>
-                <Select
-                  labelId='demo-simple-select-outlined-label'
-                  id='demo-simple-select-outlined'
-                  label='Age Range'
-                >
-                  <MenuItem value=''>
-                    <em>None</em>
-                  </MenuItem>
-                  <MenuItem value={`0-3`}>0 to 3</MenuItem>
-                  <MenuItem value={`4-6`}>4 to 6</MenuItem>
-                  <MenuItem value={`7-9`}>7 to 9</MenuItem>
-                  <MenuItem value={`Over 10`}>Over 10</MenuItem>
-                </Select>
+              <FormControl variant='outlined' className={classes.formControl}>
+                <InputLabel>Age</InputLabel>
+                <Controller
+                  name='ageRange'
+                  control={control}
+                  as={
+                    <Select label='Age Range' inputRef={register}>
+                      <MenuItem value=''>
+                        <em>None</em>
+                      </MenuItem>
+                      <MenuItem value={`0-3`}>0 to 3</MenuItem>
+                      <MenuItem value={`4-6`}>4 to 6</MenuItem>
+                      <MenuItem value={`7-9`}>7 to 9</MenuItem>
+                      <MenuItem value={`Over 10`}>Over 10</MenuItem>
+                    </Select>
+                  }
+                />
               </FormControl>
             </Grid>
             <Grid item xs={12} lg={3}>
-              <FormControl style={{ width: '100%' }}>
+              <FormControl className={classes.formControl}>
                 <TextField
-                  id='outlined-basic'
+                  name='sku'
                   label='SKU'
                   variant='outlined'
                   disabled
                   helperText='Please generate a SKU' //make this conditional to whether there is a sku or not
+                  inputRef={register}
                 />
               </FormControl>
             </Grid>{' '}
@@ -115,13 +135,14 @@ export default function AddBookForm () {
               </Button>
             </Grid>
             <Grid item xs={12}>
-              <FormControl style={{ width: '100%' }}>
+              <FormControl className={classes.formControl}>
                 <TextField
-                  id='outlined-basic'
+                  name='description'
                   label='Description'
                   variant='outlined'
                   multiline
                   rows={4}
+                  inputRef={register}
                 />
               </FormControl>
             </Grid>
@@ -149,45 +170,44 @@ export default function AddBookForm () {
         <Grid item xs={12} md={4}>
           <div style={{ maxWidth: '100%', padding: '0 20px' }}>
             <img
-              style={{
-                maxWidth: '100%',
-                maxHeight: '100%',
-                display: 'block'
-              }}
+              className={classes.coverImg}
               src={`http://lorempixel.com/300/400`}
-              alt={`the book`}
+              alt={`Book cover`}
             />
           </div>
         </Grid>
         <Grid item xs={8} style={{ marginTop: 20 }}>
           <Grid container spacing={3}>
             <Grid item xs={12} lg={4}>
-              <FormControl>
+              <FormControl className={classes.formControl}>
                 <TextField
-                  id='outlined-basic'
+                  name='purchasePrice'
                   label='Purchase price'
                   variant='outlined'
+                  inputRef={register}
                 />
               </FormControl>
             </Grid>
             <Grid item xs={12} lg={4}>
-              <FormControl>
+              <FormControl className={classes.formControl}>
                 <TextField
-                  id='outlined-basic'
+                  name='datePurchased'
                   label='Date purchased'
                   type='date'
                   InputLabelProps={{
                     shrink: true
                   }}
+                  inputRef={register}
                 />
               </FormControl>
             </Grid>
             <Grid item xs={12} lg={4}>
-              <FormControl>
+              <FormControl className={classes.formControl}>
                 <TextField
-                  id='outlined-basic'
+                  name='amountBought'
                   label='Amount bought'
                   variant='outlined'
+                  inputRef={register}
                 />
               </FormControl>
             </Grid>
@@ -196,6 +216,7 @@ export default function AddBookForm () {
       </Grid>
 
       <Button
+        type='submit'
         color='primary'
         variant='contained'
         size='large'

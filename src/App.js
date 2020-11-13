@@ -85,7 +85,9 @@ function App () {
             <Grid container spacing={3}>
               <Grid item xs={12}>
                 <Typography variant='h3'>Add a book:</Typography>
-                <AddBookForm />
+                <Paper style={{ padding: 5 }}>
+                  <AddBookForm />
+                </Paper>
               </Grid>
             </Grid>
           </Container>
