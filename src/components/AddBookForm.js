@@ -1,9 +1,9 @@
-import React, { useState } from 'react'
+import React, { useRef, useState } from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import * as Yup from 'yup'
 
-import { app } from '../base'
+import { app, storage, firestore } from '../base'
 
 import { makeStyles } from '@material-ui/core/styles'
 import TextField from '@material-ui/core/TextField'
@@ -57,29 +57,45 @@ export default function AddBookForm () {
     mode: 'onBlur'
   })
 
-  const [coverPhotoUrl, setCoverPhotoUrl] = useState(``)
+  const [coverImageUrl, setCoverImageUrl] = useState(``)
 
   const onFileChange = e => {
     const file = e.target.files[0]
 
-    const storageRef = app.storage().ref()
+    const storageRef = storage.ref()
 
     const fileRef = storageRef.child(file.name)
     fileRef.put(file).then(() => {
       console.log(`file uploaded`)
-      app
-        .storage()
+      storage
         .ref(file.name)
         .getDownloadURL()
         .then(url => {
-          setCoverPhotoUrl(url)
+          setCoverImageUrl(url)
         })
     })
   }
 
-  const onSubmit = data => {
+  const booksRef = firestore.collection('books')
+
+  const onSubmit = async data => {
     data['sku'] = 'No SKU'
-    data['coverPhoto'] = coverPhotoUrl
+    data['coverImage'] = coverImageUrl
+
+    await booksRef.add({
+      ageRange: data['ageRange'],
+      amountBought: data['amountBought'],
+      author: data['author'],
+      bookName: data['bookName'],
+      coverImage: data['coverImage'],
+      datePurchase: data['datePurchased'],
+      description: data['description'],
+      gender: data['gender'],
+      purchasePrice: data['purchasePrice'],
+      sku: data['sku'],
+      createdAt: app.firestore.FieldValue.serverTimestamp()
+    })
+
     console.log(data)
   }
 
@@ -132,7 +148,7 @@ export default function AddBookForm () {
                     <Select
                       label='Gender'
                       error={!!errors.gender}
-                      helperText={errors?.gender?.message}
+                      helpertext={errors?.gender?.message}
                     >
                       <MenuItem value=''>
                         <em>None</em>
@@ -152,7 +168,11 @@ export default function AddBookForm () {
                   name='ageRange'
                   control={control}
                   as={
-                    <Select label='Age Range' inputRef={register}>
+                    <Select
+                      label='Age Range'
+                      error={!!errors.ageRange}
+                      helpertext={errors?.ageRange?.message}
+                    >
                       <MenuItem value=''>
                         <em>None</em>
                       </MenuItem>
@@ -196,7 +216,7 @@ export default function AddBookForm () {
               </FormControl>
             </Grid>
             <Grid item xs={12}>
-              <label htmlFor='coverPhoto'>
+              <label htmlFor='coverImage'>
                 <Button
                   color='secondary'
                   variant='contained'
@@ -206,8 +226,8 @@ export default function AddBookForm () {
                   Upload Cover Picture
                   <input
                     hidden
-                    id='coverPhoto'
-                    name='coverPhoto'
+                    id='coverImage'
+                    name='coverImage'
                     ref={register}
                     type='file'
                     onChange={onFileChange}
@@ -221,7 +241,7 @@ export default function AddBookForm () {
           <div style={{ maxWidth: '100%', padding: '0 20px' }}>
             <img
               className={classes.coverImg}
-              src={coverPhotoUrl || `http://lorempixel.com/300/400`}
+              src={coverImageUrl || `http://lorempixel.com/300/400`}
               alt={`Book cover`}
             />
           </div>
