@@ -1,4 +1,7 @@
 import React from 'react'
+
+import { app, auth } from '../base'
+
 import { makeStyles } from '@material-ui/core/styles'
 import AppBar from '@material-ui/core/AppBar'
 import Toolbar from '@material-ui/core/Toolbar'
@@ -19,8 +22,29 @@ const useStyles = makeStyles(theme => ({
   }
 }))
 
-export default function AppHeader () {
+const AppHeader = ({ signedIn, user }) => {
   const classes = useStyles()
+
+  function SignIn () {
+    const signInWithGoogle = () => {
+      const provider = new app.auth.GoogleAuthProvider()
+      auth.signInWithPopup(provider)
+    }
+
+    return (
+      <Button variant='outlined' onClick={signInWithGoogle}>
+        Sign In
+      </Button>
+    )
+  }
+
+  function SignOut () {
+    return (
+      <Button variant='outlined' onClick={() => auth.signOut()}>
+        Sign Out
+      </Button>
+    )
+  }
 
   return (
     <div className={classes.root}>
@@ -30,11 +54,11 @@ export default function AppHeader () {
           <Typography variant='h6' className={classes.title}>
             BKR CONNECT
           </Typography>
-          <Button color='inherit' variant='outlined'>
-            Login
-          </Button>
+          {auth.currentUser ? <SignOut /> : <SignIn />}
         </Toolbar>
       </AppBar>
     </div>
   )
 }
+
+export default AppHeader
