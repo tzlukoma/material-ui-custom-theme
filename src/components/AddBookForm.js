@@ -207,24 +207,6 @@ export default function AddBookForm () {
                 />
               </FormControl>
             </Grid>
-            <Grid item xs={12} lg={3}>
-              <FormControl className={classes.formControl}>
-                <TextField
-                  error
-                  name='sku'
-                  label='SKU'
-                  variant='outlined'
-                  disabled
-                  helperText='Please generate a SKU' //make this conditional to whether there is a sku or not
-                  inputRef={register}
-                />
-              </FormControl>
-            </Grid>{' '}
-            <Grid item xs={12} lg={3}>
-              <Button variant='contained' size='large' color='secondary'>
-                Generate SKU
-              </Button>
-            </Grid>
             <Grid item xs={12}>
               <FormControl className={classes.formControl}>
                 <TextField
