@@ -1,9 +1,10 @@
-import React, { useRef, useState } from 'react'
+import React, { useState } from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import * as Yup from 'yup'
 
 import { app, storage, firestore } from '../base'
+import { useDocumentData } from 'react-firebase-hooks/firestore'
 
 import { makeStyles } from '@material-ui/core/styles'
 import TextField from '@material-ui/core/TextField'
@@ -59,6 +60,12 @@ export default function AddBookForm () {
 
   const [coverImageUrl, setCoverImageUrl] = useState(``)
 
+  const bookStatsRef = firestore.collection('books').doc('--stats--')
+  const booksRef = firestore.collection('books')
+  const [bookStats] = useDocumentData(bookStatsRef, { idField: 'id' })
+
+  const increment = app.firestore.FieldValue.increment(1)
+
   const onFileChange = e => {
     const file = e.target.files[0]
 
@@ -76,25 +83,40 @@ export default function AddBookForm () {
     })
   }
 
-  const booksRef = firestore.collection('books')
+  const generateSku = (gender, ageRange, currentStockNumber) => {
+    const genderMap = {
+      [`Boys`]: 'B',
+      [`Girls`]: 'G',
+      [`Both`]: 'E'
+    }
+    const ageRangeMap = {
+      '0-3': '03',
+      '4-6': '46',
+      '7-9': '79',
+      'Over 10': '10'
+    }
+    const genderPortion = genderMap[gender]
+    const ageRangePortion = ageRangeMap[ageRange]
+    const leadingNumber = currentStockNumber.padStart(5, '0')
+
+    return genderPortion + ageRangePortion + leadingNumber
+  }
 
   const onSubmit = async data => {
-    data['sku'] = 'No SKU'
+    const currentBookCount = bookStats && bookStats.booksCount
+    data['sku'] = generateSku(
+      data['gender'],
+      data['ageRange'],
+      currentBookCount.toString()
+    )
     data['coverImage'] = coverImageUrl
 
     await booksRef.add({
-      ageRange: data['ageRange'],
-      amountBought: data['amountBought'],
-      author: data['author'],
-      bookName: data['bookName'],
-      coverImage: data['coverImage'],
-      datePurchase: data['datePurchased'],
-      description: data['description'],
-      gender: data['gender'],
-      purchasePrice: data['purchasePrice'],
-      sku: data['sku'],
+      ...data,
       createdAt: app.firestore.FieldValue.serverTimestamp()
     })
+
+    await bookStatsRef.update({ booksCount: increment })
 
     console.log(data)
   }
