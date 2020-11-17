@@ -10,6 +10,9 @@ import Button from '@material-ui/core/Button'
 import IconButton from '@material-ui/core/IconButton'
 import LibraryBooksIcon from '@material-ui/icons/LibraryBooksOutlined'
 
+import { ReactComponent as BookIcon } from '../assets/book.svg'
+import { ReactComponent as SignOutIcon } from '../assets/dark-icons/logout.svg'
+
 const useStyles = makeStyles(theme => ({
   root: {
     flexGrow: 1
@@ -28,7 +31,8 @@ const AppHeader = ({ signedIn, user }) => {
   function SignOut () {
     return (
       <Button variant='outlined' onClick={() => auth.signOut()}>
-        Sign Out
+        <SignOutIcon style={{ marginRight: 10, width: 20 }} />
+        <Typography variant='h6'>Sign Out</Typography>
       </Button>
     )
   }
@@ -37,7 +41,7 @@ const AppHeader = ({ signedIn, user }) => {
     <div className={classes.root}>
       <AppBar position='static' color='primary'>
         <Toolbar>
-          <LibraryBooksIcon style={{ paddingRight: 5 }} />
+          <BookIcon style={{ paddingRight: 5 }} />
           <Typography variant='h6' className={classes.title}>
             BKR CONNECT
           </Typography>

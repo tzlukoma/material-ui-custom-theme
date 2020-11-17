@@ -17,6 +17,9 @@ const theme = createMuiTheme({
     h3: {
       fontFamily: 'Poppins',
       fontWeight: 200
+    },
+    caption: {
+      fontSize: '.8em'
     }
   }
 })
