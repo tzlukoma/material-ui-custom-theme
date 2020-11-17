@@ -62,7 +62,7 @@ export default function AddBookForm ({ handleClose }) {
   const [coverImageUrl, setCoverImageUrl] = useState(``)
 
   const bookStatsRef = firestore.collection('books').doc('--stats--')
-  const booksRef = firestore.collection('books')
+
   const [bookStats] = useDocumentData(bookStatsRef, { idField: 'id' })
 
   const increment = app.firestore.FieldValue.increment(1)
@@ -105,14 +105,19 @@ export default function AddBookForm ({ handleClose }) {
 
   const onSubmit = async data => {
     const currentBookCount = bookStats && bookStats.booksCount
-    data['sku'] = generateSku(
+    const newSku = generateSku(
       data['gender'],
       data['ageRange'],
       currentBookCount.toString()
     )
+    data['sku'] = newSku
     data['coverImage'] = coverImageUrl
 
-    await booksRef.add({
+    console.log(`newSku`, newSku)
+
+    const booksRef = firestore.collection('books').doc(data['sku'])
+
+    await booksRef.set({
       ...data,
       createdAt: app.firestore.FieldValue.serverTimestamp()
     })
