@@ -6,7 +6,14 @@ import { useCollectionData } from 'react-firebase-hooks/firestore'
 
 import Typography from '@material-ui/core/Typography'
 
-import { Container, Grid } from '@material-ui/core'
+import {
+  List,
+  ListItem,
+  Grid,
+  ListItemAvatar,
+  ListItemText,
+  Avatar
+} from '@material-ui/core'
 
 const BookList = () => {
   const booksRef = firestore.collection('books')
@@ -18,26 +25,26 @@ const BookList = () => {
     <div>
       <Grid container style={{ padding: 12 }}>
         <Grid item xs={12}>
-          <Typography variant='h3'>Book List</Typography>
-        </Grid>
-        <Grid item xs={12}>
-          {books &&
-            books.map(book => {
-              return (
-                <Grid container spacing={3}>
-                  <Grid item xs={2}>
-                    <img
-                      src={book.coverImage}
-                      alt={`Book cover`}
-                      style={{ height: 100, margin: 'auto' }}
-                    />
-                  </Grid>
-                  <Grid item xs={10}>
-                    <Typography>{book.bookName}</Typography>
-                  </Grid>
-                </Grid>
-              )
-            })}
+          <List>
+            {books &&
+              books.map(book => {
+                return (
+                  <ListItem container spacing={3}>
+                    <ListItemAvatar item xs={2}>
+                      <img
+                        src={book.coverImage}
+                        alt={`Book cover`}
+                        style={{ height: 100, margin: 'auto' }}
+                      />
+                    </ListItemAvatar>
+                    <ListItemText item xs={10} style={{ marginLeft: 20 }}>
+                      <Typography variant='h4'>{book.bookName}</Typography>
+                      <Typography>{`by ${book.author}`}</Typography>
+                    </ListItemText>
+                  </ListItem>
+                )
+              })}
+          </List>
         </Grid>
       </Grid>
     </div>

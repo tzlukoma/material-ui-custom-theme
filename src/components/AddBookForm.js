@@ -34,7 +34,8 @@ const useStyles = makeStyles(theme => ({
     width: '100%'
   },
   coverImg: {
-    width: '90%',
+    maxWidth: '50%',
+    maxHeight: '40%',
     margin: 'auto',
     display: 'block'
   }
@@ -50,7 +51,7 @@ const schema = Yup.object().shape({
     .required('Amount bought is required')
 })
 
-export default function AddBookForm () {
+export default function AddBookForm ({ handleClose }) {
   const classes = useStyles()
 
   const { register, handleSubmit, control, errors } = useForm({
@@ -119,6 +120,7 @@ export default function AddBookForm () {
     await bookStatsRef.update({ booksCount: increment })
 
     console.log(data)
+    handleClose()
   }
 
   return (
@@ -129,7 +131,7 @@ export default function AddBookForm () {
       onSubmit={handleSubmit(onSubmit)}
     >
       <Grid container>
-        <Grid item xs={12} md={8}>
+        <Grid item xs={12} md={9}>
           <Grid container alignItems='flex-start' spacing={3}>
             <Grid item xs={12} sm={6}>
               <FormControl className={classes.formControl}>
@@ -219,40 +221,7 @@ export default function AddBookForm () {
                 />
               </FormControl>
             </Grid>
-            <Grid item xs={12}>
-              <label htmlFor='coverImage'>
-                <Button
-                  color='secondary'
-                  variant='contained'
-                  component='label'
-                  style={{ marginBottom: 20 }}
-                >
-                  Upload Cover Picture
-                  <input
-                    hidden
-                    id='coverImage'
-                    name='coverImage'
-                    ref={register}
-                    type='file'
-                    onChange={onFileChange}
-                  />
-                </Button>
-              </label>
-            </Grid>
-          </Grid>
-        </Grid>
-        <Grid item xs={12} md={4}>
-          <div style={{ maxWidth: '100%', padding: '0 20px' }}>
-            <img
-              className={classes.coverImg}
-              src={coverImageUrl || `http://lorempixel.com/300/400`}
-              alt={`Book cover`}
-            />
-          </div>
-        </Grid>
-        <Grid item xs={8} style={{ marginTop: 20 }}>
-          <Grid container spacing={3}>
-            <Grid item xs={12} lg={4}>
+            <Grid item xs={12} sm={4}>
               <FormControl className={classes.formControl}>
                 <TextField
                   name='purchasePrice'
@@ -262,7 +231,7 @@ export default function AddBookForm () {
                 />
               </FormControl>
             </Grid>
-            <Grid item xs={12} lg={4}>
+            <Grid item xs={12} sm={4}>
               <FormControl className={classes.formControl}>
                 <TextField
                   name='datePurchased'
@@ -275,7 +244,7 @@ export default function AddBookForm () {
                 />
               </FormControl>
             </Grid>
-            <Grid item xs={12} lg={4}>
+            <Grid item xs={12} sm={4}>
               <FormControl className={classes.formControl}>
                 <TextField
                   name='amountBought'
@@ -287,17 +256,57 @@ export default function AddBookForm () {
             </Grid>
           </Grid>
         </Grid>
+        <Grid item xs={12} md={3}>
+          <div style={{ maxWidth: '100%', padding: '20px 0px 0px' }}>
+            {coverImageUrl ? (
+              <img
+                className={classes.coverImg}
+                src={coverImageUrl}
+                alt={`Book cover`}
+              />
+            ) : (
+              <img
+                className={classes.coverImg}
+                src={`https://placeholder.pics/svg/200x250/FCFFC6-FFFFFF/Book%20Cover%20image`}
+                alt={`Book cover`}
+              />
+            )}
+            <div
+              style={{ padding: 20, display: 'flex', justifyContent: 'center' }}
+            >
+              <label htmlFor='coverImage'>
+                <Button
+                  color='primary'
+                  variant='outlined'
+                  component='label'
+                  style={{ marginBottom: 20 }}
+                >
+                  Upload Cover Image
+                  <input
+                    hidden
+                    id='coverImage'
+                    name='coverImage'
+                    ref={register}
+                    type='file'
+                    onChange={onFileChange}
+                  />
+                </Button>
+              </label>
+            </div>
+          </div>
+        </Grid>
+        <Grid item xs={12}>
+          <Button
+            type='submit'
+            color='primary'
+            variant='contained'
+            size='large'
+            style={{ marginTop: 20 }}
+          >
+            Add Book to Inventory
+          </Button>
+        </Grid>
       </Grid>
-
-      <Button
-        type='submit'
-        color='primary'
-        variant='contained'
-        size='large'
-        style={{ marginTop: 20 }}
-      >
-        Add Book to Inventory
-      </Button>
     </form>
   )
 }

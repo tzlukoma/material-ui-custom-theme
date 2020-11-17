@@ -25,19 +25,6 @@ const useStyles = makeStyles(theme => ({
 const AppHeader = ({ signedIn, user }) => {
   const classes = useStyles()
 
-  function SignIn () {
-    const signInWithGoogle = () => {
-      const provider = new app.auth.GoogleAuthProvider()
-      auth.signInWithPopup(provider)
-    }
-
-    return (
-      <Button variant='outlined' onClick={signInWithGoogle}>
-        Sign In
-      </Button>
-    )
-  }
-
   function SignOut () {
     return (
       <Button variant='outlined' onClick={() => auth.signOut()}>
@@ -54,7 +41,7 @@ const AppHeader = ({ signedIn, user }) => {
           <Typography variant='h6' className={classes.title}>
             BKR CONNECT
           </Typography>
-          {auth.currentUser ? <SignOut /> : <SignIn />}
+          {auth.currentUser && <SignOut />}
         </Toolbar>
       </AppBar>
     </div>
