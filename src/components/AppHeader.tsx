@@ -1,14 +1,12 @@
 import React from 'react'
 
-import { app, auth } from '../base'
+import { auth } from '../base'
 
 import { makeStyles } from '@material-ui/core/styles'
 import AppBar from '@material-ui/core/AppBar'
 import Toolbar from '@material-ui/core/Toolbar'
 import Typography from '@material-ui/core/Typography'
 import Button from '@material-ui/core/Button'
-import IconButton from '@material-ui/core/IconButton'
-import LibraryBooksIcon from '@material-ui/icons/LibraryBooksOutlined'
 
 import { ReactComponent as BookIcon } from '../assets/book.svg'
 import { ReactComponent as SignOutIcon } from '../assets/dark-icons/logout.svg'
@@ -25,7 +23,12 @@ const useStyles = makeStyles(theme => ({
   }
 }))
 
-const AppHeader = ({ signedIn, user }) => {
+type AppHeaderProps = {
+  signedIn:boolean,
+  user:object
+}
+
+const AppHeader = ({ signedIn, user }:AppHeaderProps) => {
   const classes = useStyles()
 
   function SignOut () {

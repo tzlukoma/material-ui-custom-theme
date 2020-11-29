@@ -41,18 +41,40 @@ const useStyles = makeStyles(theme => ({
   }
 }))
 
+interface AddBookFormProps {
+  isDialogOpen: React.Dispatch<React.SetStateAction<boolean>>
+}
+
+interface BookSubmission {
+  gender:string,
+  ageRange:string,
+  genderCategoryId:number,
+  ageRangeCategoryId:number,
+  sku:string,
+  coverImage:string,
+  stockCount:number,
+  amountBought:number
+}
+
+interface BookCount {
+  booksCount:number
+}
+
+
+
+
 const schema = Yup.object().shape({
   title: Yup.string().required(`Please enter the name of the book`),
   format: Yup.string().required(`Please select a format`),
   author: Yup.string().required(`Please enter the author's name`),
   gender: Yup.string().required(`Please select a gender`),
-  amountBought: Yup.number('Please enter number')
+  amountBought: Yup.number()
     .positive('Please enter a positive number')
     .integer('Please enter a number')
     .required('Amount bought is required')
 })
 
-export default function AddBookForm ({ handleClose }) {
+const AddBookForm = ({ isDialogOpen }:AddBookFormProps) => {
   const classes = useStyles()
 
   const { register, handleSubmit, control, errors } = useForm({
@@ -64,17 +86,18 @@ export default function AddBookForm ({ handleClose }) {
 
   const bookStatsRef = firestore.collection('books').doc('--stats--')
 
-  const [bookStats] = useDocumentData(bookStatsRef, { idField: 'id' })
+  const [bookStats] = useDocumentData<BookCount>(bookStatsRef, { idField: 'id' })
 
   const increment = app.firestore.FieldValue.increment(1)
 
-  const onFileChange = e => {
-    const file = e.target.files[0]
+  const onFileChange:((event: React.ChangeEvent<HTMLInputElement>) => void) | undefined = e => {
+    const file:File | null = e.target.files && e.target.files[0]
 
     const storageRef = storage.ref()
 
-    const fileRef = storageRef.child(file.name)
-    fileRef.put(file).then(() => {
+    if(file) {
+      const fileRef = storageRef.child(file.name)
+      fileRef && fileRef.put(file).then(() => {
       console.log(`file uploaded`)
       storage
         .ref(file.name)
@@ -83,19 +106,23 @@ export default function AddBookForm ({ handleClose }) {
           setCoverImageUrl(url)
         })
     })
+    } else {
+      return
+    }
+    
   }
-  const genderMap = {
+  const genderMap:any = {
     [`Boys`]: { id: 33, value: 'B' },
     [`Girls`]: { id: 31, value: 'G' },
     [`Both`]: { id: 35, value: 'E' }
   }
-  const ageRangeMap = {
+  const ageRangeMap:any = {
     '0-3': { id: 36, value: '03' },
     '4-6': { id: 29, value: '46' },
     '7-9': { id: 34, value: '79' },
     'Over 10': { id: 32, value: '10' }
   }
-  const generateSku = (gender, ageRange, currentStockNumber) => {
+  const generateSku = (gender:string, ageRange:string, currentStockNumber:string) => {
     const genderPortion = genderMap[gender].value
     const ageRangePortion = ageRangeMap[ageRange].value
     const leadingNumber = currentStockNumber.padStart(5, '0')
@@ -103,36 +130,36 @@ export default function AddBookForm ({ handleClose }) {
     return genderPortion + ageRangePortion + leadingNumber
   }
 
-  const onSubmit = async data => {
-    const currentBookCount = bookStats && bookStats.booksCount
-    console.log(`genderMap`, genderMap[data['gender']].id)
-    const genderCategoryId = genderMap[data['gender']].id
-    const ageRangeCategoryId = ageRangeMap[data['ageRange']].id
+  const onSubmit = async (submitData:BookSubmission) => {
+    const currentBookCount = (bookStats && bookStats.booksCount) || 0
+    console.log(`genderMap`, genderMap[submitData['gender']].id)
+    const genderCategoryId = genderMap[submitData['gender']].id
+    const ageRangeCategoryId = ageRangeMap[submitData['ageRange']].id
 
     const newSku = generateSku(
-      data['gender'],
-      data['ageRange'],
+      submitData['gender'],
+      submitData['ageRange'],
       currentBookCount.toString()
     )
-    data['genderCategoryId'] = genderCategoryId
-    data['ageRangeCategoryId'] = ageRangeCategoryId
-    data['sku'] = newSku
-    data['coverImage'] = coverImageUrl
-    data['stockCount'] = data['amountBought']
+    submitData['genderCategoryId'] = genderCategoryId
+    submitData['ageRangeCategoryId'] = ageRangeCategoryId
+    submitData['sku'] = newSku
+    submitData['coverImage'] = coverImageUrl
+    submitData['stockCount'] = submitData['amountBought']
 
     console.log(`newSku`, newSku)
 
-    const booksRef = firestore.collection('books').doc(data['sku'])
+    const booksRef = firestore.collection('books').doc(submitData['sku'])
 
     await booksRef.set({
-      ...data,
+      ...submitData,
       createdAt: app.firestore.FieldValue.serverTimestamp()
     })
 
     await bookStatsRef.update({ booksCount: increment })
 
-    console.log(data)
-    handleClose()
+    console.log(submitData)
+    isDialogOpen(false)
   }
 
   return (
@@ -179,11 +206,12 @@ export default function AddBookForm ({ handleClose }) {
                 <Controller
                   name='format'
                   control={control}
+                  helpertext={errors?.format?.message}
                   as={
                     <Select
                       label='Format'
                       error={!!errors.format}
-                      helpertext={errors?.format?.message}
+                      
                     >
                       <MenuItem value=''>
                         <em>None</em>
@@ -196,16 +224,17 @@ export default function AddBookForm ({ handleClose }) {
               </FormControl>
             </Grid>
             <Grid item xs={12} sm={6} lg={3}>
-              <FormControl variant='outlined' className={classes.formControl}>
+              <FormControl variant='outlined' className={classes.formControl} >
                 <InputLabel>Gender</InputLabel>
                 <Controller
                   name='gender'
                   control={control}
+                  helperText={errors?.gender?.message}
                   as={
                     <Select
                       label='Gender'
                       error={!!errors.gender}
-                      helpertext={errors?.gender?.message}
+                      
                     >
                       <MenuItem value=''>
                         <em>None</em>
@@ -224,11 +253,12 @@ export default function AddBookForm ({ handleClose }) {
                 <Controller
                   name='ageRange'
                   control={control}
+                  helpertext={errors?.ageRange?.message}
                   as={
                     <Select
                       label='Age Range'
                       error={!!errors.ageRange}
-                      helpertext={errors?.ageRange?.message}
+                      
                     >
                       <MenuItem value=''>
                         <em>None</em>
@@ -343,3 +373,5 @@ export default function AddBookForm ({ handleClose }) {
     </form>
   )
 }
+
+export default AddBookForm

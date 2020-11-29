@@ -1,9 +1,8 @@
 import React, { useState } from 'react'
 
-import { auth, firestore, analytics } from './base'
+import { auth } from './base'
 
 import { useAuthState } from 'react-firebase-hooks/auth'
-import { useCollectionData } from 'react-firebase-hooks/firestore'
 
 import { ThemeProvider } from '@material-ui/core/styles'
 import CssBaseline from '@material-ui/core/CssBaseline'
@@ -15,25 +14,25 @@ import Button from '@material-ui/core/Button'
 
 import AppHeader from './components/AppHeader'
 import AddBookForm from './components/AddBookForm'
-import { Dialog, DialogTitle, Grid, Paper, Divider } from '@material-ui/core'
+import { Dialog, DialogTitle, Grid, Divider } from '@material-ui/core'
 import BookList from './components/BookList'
 
 import { ReactComponent as PlusIcon } from './assets/dark-icons/plus-circle.svg'
 import SignInPage from './pages/SignInPage'
 
-const App = () => {
+const App:React.FC = () => {
   const [user] = useAuthState(auth)
   const [dialogOpen, setDialogOpen] = useState(false)
 
-  const signedIn = !!auth.currentUser
+  const signedIn:boolean = !!auth.currentUser
 
   console.log(user, signedIn)
 
-  const handleOpen = () => {
+  const handleOpen = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>):void => {
     setDialogOpen(true)
   }
 
-  const handleClose = () => {
+  const handleClose = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>):void =>{
     setDialogOpen(false)
   }
 
@@ -71,7 +70,7 @@ const App = () => {
                 <DialogTitle>
                   <Typography variant='h3'>Add Book</Typography>
                 </DialogTitle>
-                <AddBookForm handleClose={handleClose} />
+                <AddBookForm isDialogOpen={setDialogOpen} />
               </Dialog>
             </>
           ) : (

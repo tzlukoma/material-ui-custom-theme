@@ -25,13 +25,23 @@ const useStyles = makeStyles(theme => ({
   }
 }))
 
+interface Book {
+  id:string,
+  title:string, 
+  author:string,
+  coverImage:string,
+  sku:string
+}
+
+
+
 const BookList = () => {
   const classes = useStyles()
 
   const booksRef = firestore.collection('books')
   const query = booksRef.orderBy('createdAt', 'desc')
 
-  const [books] = useCollectionData(query, { idField: 'id' })
+  const [books] = useCollectionData<Book>(query, { idField: 'id' })
 
   return (
     <div>
@@ -41,8 +51,8 @@ const BookList = () => {
             {books &&
               books.map(book => {
                 return (
-                  <ListItem container spacing={3} className={classes.listItem}>
-                    <ListItemAvatar item xs={2}>
+                  <ListItem className={classes.listItem}>
+                    <ListItemAvatar >
                       <img
                         src={book.coverImage}
                         alt={`Book cover`}
@@ -50,8 +60,6 @@ const BookList = () => {
                       />
                     </ListItemAvatar>
                     <ListItemText
-                      item
-                      xs={10}
                       style={{
                         marginLeft: 20
                       }}

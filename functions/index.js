@@ -85,15 +85,3 @@ exports.createWoocommerceBook = functions.firestore
 
     return bookId
   })
-// .then(bookId => {
-//   const bookRef = db.collection('books').doc(bookId)
-
-//   bookRef.set(
-//     {
-//       woocommerceId: bookId
-//     },
-//     { merge: true }
-//   )
-
-//   return bookRef
-// })
