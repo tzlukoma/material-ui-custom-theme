@@ -29,7 +29,7 @@ const BookList = () => {
   const classes = useStyles()
 
   const booksRef = firestore.collection('books')
-  const query = booksRef.orderBy('createdAt')
+  const query = booksRef.orderBy('createdAt', 'desc')
 
   const [books] = useCollectionData(query, { idField: 'id' })
 
@@ -56,7 +56,7 @@ const BookList = () => {
                         marginLeft: 20
                       }}
                     >
-                      <Typography variant='h4'>{book.bookName}</Typography>
+                      <Typography variant='h4'>{book.title}</Typography>
                       <Typography>{`by ${book.author}`}</Typography>
                       <Typography variant='caption'>{book.sku}</Typography>
                     </ListItemText>

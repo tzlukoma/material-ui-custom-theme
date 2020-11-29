@@ -42,7 +42,8 @@ const useStyles = makeStyles(theme => ({
 }))
 
 const schema = Yup.object().shape({
-  bookName: Yup.string().required(`Please enter the name of the book`),
+  title: Yup.string().required(`Please enter the name of the book`),
+  format: Yup.string().required(`Please select a format`),
   author: Yup.string().required(`Please enter the author's name`),
   gender: Yup.string().required(`Please select a gender`),
   amountBought: Yup.number('Please enter number')
@@ -83,21 +84,20 @@ export default function AddBookForm ({ handleClose }) {
         })
     })
   }
-
+  const genderMap = {
+    [`Boys`]: { id: 33, value: 'B' },
+    [`Girls`]: { id: 31, value: 'G' },
+    [`Both`]: { id: 35, value: 'E' }
+  }
+  const ageRangeMap = {
+    '0-3': { id: 36, value: '03' },
+    '4-6': { id: 29, value: '46' },
+    '7-9': { id: 34, value: '79' },
+    'Over 10': { id: 32, value: '10' }
+  }
   const generateSku = (gender, ageRange, currentStockNumber) => {
-    const genderMap = {
-      [`Boys`]: 'B',
-      [`Girls`]: 'G',
-      [`Both`]: 'E'
-    }
-    const ageRangeMap = {
-      '0-3': '03',
-      '4-6': '46',
-      '7-9': '79',
-      'Over 10': '10'
-    }
-    const genderPortion = genderMap[gender]
-    const ageRangePortion = ageRangeMap[ageRange]
+    const genderPortion = genderMap[gender].value
+    const ageRangePortion = ageRangeMap[ageRange].value
     const leadingNumber = currentStockNumber.padStart(5, '0')
 
     return genderPortion + ageRangePortion + leadingNumber
@@ -105,13 +105,20 @@ export default function AddBookForm ({ handleClose }) {
 
   const onSubmit = async data => {
     const currentBookCount = bookStats && bookStats.booksCount
+    console.log(`genderMap`, genderMap[data['gender']].id)
+    const genderCategoryId = genderMap[data['gender']].id
+    const ageRangeCategoryId = ageRangeMap[data['ageRange']].id
+
     const newSku = generateSku(
       data['gender'],
       data['ageRange'],
       currentBookCount.toString()
     )
+    data['genderCategoryId'] = genderCategoryId
+    data['ageRangeCategoryId'] = ageRangeCategoryId
     data['sku'] = newSku
     data['coverImage'] = coverImageUrl
+    data['stockCount'] = data['amountBought']
 
     console.log(`newSku`, newSku)
 
@@ -141,13 +148,13 @@ export default function AddBookForm ({ handleClose }) {
             <Grid item xs={12} sm={6}>
               <FormControl className={classes.formControl}>
                 <TextField
-                  name='bookName'
-                  id='bookName'
+                  name='title'
+                  id='title'
                   label='Book Name'
                   variant='outlined'
                   inputRef={register}
-                  error={!!errors.bookName}
-                  helperText={errors?.bookName?.message}
+                  error={!!errors.title}
+                  helperText={errors?.title?.message}
                 />
               </FormControl>
             </Grid>
@@ -164,12 +171,33 @@ export default function AddBookForm ({ handleClose }) {
               </FormControl>
             </Grid>
           </Grid>
+
           <Grid container spacing={3}>
+            <Grid item xs={12}>
+              <FormControl variant='outlined' className={classes.formControl}>
+                <InputLabel>Format</InputLabel>
+                <Controller
+                  name='format'
+                  control={control}
+                  as={
+                    <Select
+                      label='Format'
+                      error={!!errors.format}
+                      helpertext={errors?.format?.message}
+                    >
+                      <MenuItem value=''>
+                        <em>None</em>
+                      </MenuItem>
+                      <MenuItem value={`Paperback`}>Paperback</MenuItem>
+                      <MenuItem value={`Hardcover`}>Hardcover</MenuItem>
+                    </Select>
+                  }
+                />
+              </FormControl>
+            </Grid>
             <Grid item xs={12} sm={6} lg={3}>
               <FormControl variant='outlined' className={classes.formControl}>
-                <InputLabel id='demo-simple-select-outlined-label'>
-                  Gender
-                </InputLabel>
+                <InputLabel>Gender</InputLabel>
                 <Controller
                   name='gender'
                   control={control}
