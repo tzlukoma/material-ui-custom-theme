@@ -40,6 +40,7 @@ exports.createWoocommerceBook = functions.firestore
   .document('books/{bookId}')
   .onCreate(async (snapshot, context) => {
     const book = snapshot.data()
+    const bookId = snapshot.id
 
     const wcBody = {
       name: book.title,
@@ -60,7 +61,39 @@ exports.createWoocommerceBook = functions.firestore
       sku: book.sku
     }
 
-    createWCProduct(wcBody)
-
     console.log(wcBody)
+
+    try {
+      const wcBookCreated = await createWCProduct(wcBody)
+
+      console.log(`bookId`, bookId)
+      console.log(`wcBookId: `, wcBookCreated.id)
+
+      const bookRef = db.collection('books').doc(bookId)
+
+      bookRef
+        .set(
+          {
+            woocommerceId: wcBookCreated.id
+          },
+          { merge: true }
+        )
+        .catch(err => console.log(err))
+    } catch (error) {
+      console.log(error)
+    }
+
+    return bookId
   })
+// .then(bookId => {
+//   const bookRef = db.collection('books').doc(bookId)
+
+//   bookRef.set(
+//     {
+//       woocommerceId: bookId
+//     },
+//     { merge: true }
+//   )
+
+//   return bookRef
+// })
