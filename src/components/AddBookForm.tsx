@@ -53,7 +53,9 @@ interface BookSubmission {
   sku:string,
   coverImage:string,
   stockCount:number,
-  amountBought:number
+  amountBought:number,
+  retailPrice:number,
+  regularPrice:string
 }
 
 interface BookCount {
@@ -131,23 +133,31 @@ const AddBookForm = ({ isDialogOpen }:AddBookFormProps) => {
   }
 
   const onSubmit = async (submitData:BookSubmission) => {
-    const currentBookCount = (bookStats && bookStats.booksCount) || 0
+    const currentBookCount:number = (bookStats && bookStats.booksCount) || 0
     console.log(`genderMap`, genderMap[submitData['gender']].id)
-    const genderCategoryId = genderMap[submitData['gender']].id
-    const ageRangeCategoryId = ageRangeMap[submitData['ageRange']].id
+    const genderCategoryId:number = genderMap[submitData['gender']].id
+    const ageRangeCategoryId:number = ageRangeMap[submitData['ageRange']].id
 
     const newSku = generateSku(
       submitData['gender'],
       submitData['ageRange'],
       currentBookCount.toString()
     )
+
+    const computedSalePrice = Math.ceil(submitData[`retailPrice`])/1.06625
+    const roundedSalePrice = computedSalePrice.toFixed(2)
+    console.log(`computedSalePrice`,computedSalePrice)
+    console.log(`roundedSalePrice`,roundedSalePrice)
+
     submitData['genderCategoryId'] = genderCategoryId
     submitData['ageRangeCategoryId'] = ageRangeCategoryId
     submitData['sku'] = newSku
     submitData['coverImage'] = coverImageUrl
     submitData['stockCount'] = submitData['amountBought']
+    submitData['regularPrice'] = roundedSalePrice.toString()
 
     console.log(`newSku`, newSku)
+    console.log(`submitData`,submitData)
 
     const booksRef = firestore.collection('books').doc(submitData['sku'])
 
@@ -229,7 +239,7 @@ const AddBookForm = ({ isDialogOpen }:AddBookFormProps) => {
                 <Controller
                   name='gender'
                   control={control}
-                  helperText={errors?.gender?.message}
+                  helpertext={errors?.gender?.message}
                   as={
                     <Select
                       label='Gender'
@@ -280,6 +290,16 @@ const AddBookForm = ({ isDialogOpen }:AddBookFormProps) => {
                   variant='outlined'
                   multiline
                   rows={4}
+                  inputRef={register}
+                />
+              </FormControl>
+            </Grid>
+            <Grid item xs={12} sm={4}>
+              <FormControl className={classes.formControl}>
+                <TextField
+                  name='retailPrice'
+                  label='Retail price'
+                  variant='outlined'
                   inputRef={register}
                 />
               </FormControl>
