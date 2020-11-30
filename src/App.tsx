@@ -26,7 +26,7 @@ const App:React.FC = () => {
 
   const signedIn:boolean = !!auth.currentUser
 
-  console.log(user, signedIn)
+  // console.log(user, signedIn)
 
   const handleOpen = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>):void => {
     setDialogOpen(true)
@@ -68,7 +68,7 @@ const App:React.FC = () => {
               </Container>
               <Dialog open={dialogOpen} onClose={handleClose} maxWidth='xl'>
                 <DialogTitle>
-                  <Typography variant='h3'>Add Book</Typography>
+                  <Typography >Add Book</Typography>
                 </DialogTitle>
                 <AddBookForm isDialogOpen={setDialogOpen} />
               </Dialog>

@@ -51,7 +51,7 @@ const BookList = () => {
             {books &&
               books.map(book => {
                 return (
-                  <ListItem className={classes.listItem}>
+                  <ListItem key={book.id} className={classes.listItem}>
                     <ListItemAvatar >
                       <img
                         src={book.coverImage}
