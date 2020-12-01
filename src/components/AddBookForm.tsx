@@ -46,20 +46,25 @@ interface AddBookFormProps {
 }
 
 interface BookSubmission {
-  gender:string,
-  ageRange:string,
-  genderCategoryId:number,
-  ageRangeCategoryId:number,
-  sku:string,
-  coverImage:string,
-  stockCount:number,
-  amountBought:number,
-  retailPrice:number,
-  regularPrice:string
+  gender: string,
+  ageRange: string,
+  genderCategoryId: number,
+  ageRangeCategoryId: number,
+  sku: string,
+  coverImage: string,
+  stockCount: number,
+  weight: number,
+  length: number,
+  width: number,
+  height: number,
+  amountBought: number,
+  datePurchased: string,
+  retailPrice: number,
+  regularPrice: string
 }
 
 interface BookCount {
-  booksCount:number
+  booksCount: number
 }
 
 
@@ -70,13 +75,40 @@ const schema = Yup.object().shape({
   format: Yup.string().required(`Please select a format`),
   author: Yup.string().required(`Please enter the author's name`),
   gender: Yup.string().required(`Please select a gender`),
-  amountBought: Yup.number()
+  ageRange: Yup.string().required(`Please select an age range`),
+  description: Yup.string(),
+  weight: Yup.number().typeError(`Please enter a number`)
+    .positive('Please enter a positive number')
+    .integer('Please enter a number')
+    .required(`The book's weight is required`),
+  length: Yup.number().typeError(`Please enter a number`)
+    .positive('Please enter a positive number')
+    .integer('Please enter a number')
+    .required(`The book's length is required`),
+  width: Yup.number().typeError(`Please enter a number`)
+    .positive('Please enter a positive number')
+    .integer('Please enter a number')
+    .required(`The book's width is required`),
+  height: Yup.number().typeError(`Please enter a number`)
+    .positive('Please enter a positive number')
+    .integer('Please enter a number')
+    .required(`The book's height is required`),
+  retailPrice: Yup.number().typeError(`Please enter a number`)
+    .positive('Please enter a positive number')
+    .integer('Please enter a number')
+    .required('Amount bought is required'),
+  purchasePrice: Yup.number().typeError(`Please enter a number`)
+    .positive('Please enter a positive number')
+    .integer('Please enter a number')
+    .required('Amount bought is required'),
+  datePurchased: Yup.date().typeError(`Please enter a date`),
+  amountBought: Yup.number().typeError(`Please enter a number`)
     .positive('Please enter a positive number')
     .integer('Please enter a number')
     .required('Amount bought is required')
 })
 
-const AddBookForm = ({ isDialogOpen }:AddBookFormProps) => {
+const AddBookForm = ({ isDialogOpen }: AddBookFormProps) => {
   const classes = useStyles()
 
   const { register, handleSubmit, control, errors } = useForm({
@@ -92,39 +124,39 @@ const AddBookForm = ({ isDialogOpen }:AddBookFormProps) => {
 
   const increment = app.firestore.FieldValue.increment(1)
 
-  const onFileChange:((event: React.ChangeEvent<HTMLInputElement>) => void) | undefined = e => {
-    const file:File | null = e.target.files && e.target.files[0]
+  const onFileChange: ((event: React.ChangeEvent<HTMLInputElement>) => void) | undefined = e => {
+    const file: File | null = e.target.files && e.target.files[0]
 
     const storageRef = storage.ref()
 
-    if(file) {
+    if (file) {
       const fileRef = storageRef.child(file.name)
       fileRef && fileRef.put(file).then(() => {
-      console.log(`file uploaded`)
-      storage
-        .ref(file.name)
-        .getDownloadURL()
-        .then(url => {
-          setCoverImageUrl(url)
-        })
-    })
+        console.log(`file uploaded`)
+        storage
+          .ref(file.name)
+          .getDownloadURL()
+          .then(url => {
+            setCoverImageUrl(url)
+          })
+      })
     } else {
       return
     }
-    
+
   }
-  const genderMap:any = {
+  const genderMap: any = {
     [`Boys`]: { id: 33, value: 'B' },
     [`Girls`]: { id: 31, value: 'G' },
     [`Both`]: { id: 35, value: 'E' }
   }
-  const ageRangeMap:any = {
+  const ageRangeMap: any = {
     '0-3': { id: 36, value: '03' },
     '4-6': { id: 29, value: '46' },
     '7-9': { id: 34, value: '79' },
     'Over 10': { id: 32, value: '10' }
   }
-  const generateSku = (gender:string, ageRange:string, currentStockNumber:string) => {
+  const generateSku = (gender: string, ageRange: string, currentStockNumber: string) => {
     const genderPortion = genderMap[gender].value
     const ageRangePortion = ageRangeMap[ageRange].value
     const leadingNumber = currentStockNumber.padStart(5, '0')
@@ -132,11 +164,11 @@ const AddBookForm = ({ isDialogOpen }:AddBookFormProps) => {
     return genderPortion + ageRangePortion + leadingNumber
   }
 
-  const onSubmit = async (submitData:BookSubmission) => {
-    const currentBookCount:number = (bookStats && bookStats.booksCount) || 0
+  const onSubmit = async (submitData: BookSubmission) => {
+    const currentBookCount: number = (bookStats && bookStats.booksCount) || 0
     console.log(`genderMap`, genderMap[submitData['gender']].id)
-    const genderCategoryId:number = genderMap[submitData['gender']].id
-    const ageRangeCategoryId:number = ageRangeMap[submitData['ageRange']].id
+    const genderCategoryId: number = genderMap[submitData['gender']].id
+    const ageRangeCategoryId: number = ageRangeMap[submitData['ageRange']].id
 
     const newSku = generateSku(
       submitData['gender'],
@@ -144,10 +176,10 @@ const AddBookForm = ({ isDialogOpen }:AddBookFormProps) => {
       currentBookCount.toString()
     )
 
-    const computedSalePrice = Math.ceil(submitData[`retailPrice`])/1.06625
+    const computedSalePrice = Math.ceil(submitData[`retailPrice`]) / 1.06625
     const roundedSalePrice = computedSalePrice.toFixed(2)
-    console.log(`computedSalePrice`,computedSalePrice)
-    console.log(`roundedSalePrice`,roundedSalePrice)
+    console.log(`computedSalePrice`, computedSalePrice)
+    console.log(`roundedSalePrice`, roundedSalePrice)
 
     submitData['genderCategoryId'] = genderCategoryId
     submitData['ageRangeCategoryId'] = ageRangeCategoryId
@@ -157,7 +189,7 @@ const AddBookForm = ({ isDialogOpen }:AddBookFormProps) => {
     submitData['regularPrice'] = roundedSalePrice.toString()
 
     console.log(`newSku`, newSku)
-    console.log(`submitData`,submitData)
+    console.log(`submitData`, submitData)
 
     const booksRef = firestore.collection('books').doc(submitData['sku'])
 
@@ -182,7 +214,7 @@ const AddBookForm = ({ isDialogOpen }:AddBookFormProps) => {
       <Grid container>
         <Grid item xs={12} md={9}>
           <Grid container alignItems='flex-start' spacing={3}>
-            <Grid item xs={12} sm={6}>
+            <Grid item xs={12} sm={6} lg={4}>
               <FormControl className={classes.formControl}>
                 <TextField
                   name='title'
@@ -195,7 +227,7 @@ const AddBookForm = ({ isDialogOpen }:AddBookFormProps) => {
                 />
               </FormControl>
             </Grid>
-            <Grid item xs={12} sm={6}>
+            <Grid item xs={12} sm={6} lg={4}>
               <FormControl className={classes.formControl}>
                 <TextField
                   name='author'
@@ -207,44 +239,19 @@ const AddBookForm = ({ isDialogOpen }:AddBookFormProps) => {
                 />
               </FormControl>
             </Grid>
-          </Grid>
-
-          <Grid container spacing={3}>
-            <Grid item xs={12}>
-              <FormControl variant='outlined' className={classes.formControl}>
-                <InputLabel>Format</InputLabel>
-                <Controller
-                  name='format'
-                  control={control}
-                  helpertext={errors?.format?.message}
-                  as={
-                    <Select
-                      label='Format'
-                      error={!!errors.format}
-                      
-                    >
-                      <MenuItem value=''>
-                        <em>None</em>
-                      </MenuItem>
-                      <MenuItem value={`Paperback`}>Paperback</MenuItem>
-                      <MenuItem value={`Hardcover`}>Hardcover</MenuItem>
-                    </Select>
-                  }
-                />
-              </FormControl>
-            </Grid>
-            <Grid item xs={12} sm={6} lg={3}>
+            <Grid item xs={12} sm={6} lg={2}>
               <FormControl variant='outlined' className={classes.formControl} >
                 <InputLabel>Gender</InputLabel>
                 <Controller
                   name='gender'
                   control={control}
-                  helpertext={errors?.gender?.message}
+                  helperText={errors?.gender?.message}
                   as={
                     <Select
                       label='Gender'
                       error={!!errors.gender}
-                      
+
+
                     >
                       <MenuItem value=''>
                         <em>None</em>
@@ -257,7 +264,7 @@ const AddBookForm = ({ isDialogOpen }:AddBookFormProps) => {
                 />
               </FormControl>
             </Grid>
-            <Grid item xs={12} sm={6} lg={3}>
+            <Grid item xs={12} sm={6} lg={2}>
               <FormControl variant='outlined' className={classes.formControl}>
                 <InputLabel>Age</InputLabel>
                 <Controller
@@ -268,7 +275,7 @@ const AddBookForm = ({ isDialogOpen }:AddBookFormProps) => {
                     <Select
                       label='Age Range'
                       error={!!errors.ageRange}
-                      
+
                     >
                       <MenuItem value=''>
                         <em>None</em>
@@ -282,6 +289,81 @@ const AddBookForm = ({ isDialogOpen }:AddBookFormProps) => {
                 />
               </FormControl>
             </Grid>
+
+          </Grid>
+
+          <Grid container spacing={3}>
+            <Grid item xs={12} sm={6} lg={4}>
+              <FormControl variant='outlined' className={classes.formControl}>
+                <InputLabel>Format</InputLabel>
+                <Controller
+                  name='format'
+                  control={control}
+                  helpertext={errors?.format?.message}
+                  as={
+                    <Select
+                      label='Format'
+                      error={!!errors.format}
+
+                    >
+                      <MenuItem value=''>
+                        <em>None</em>
+                      </MenuItem>
+                      <MenuItem value={`Paperback`}>Paperback</MenuItem>
+                      <MenuItem value={`Hardcover`}>Hardcover</MenuItem>
+                    </Select>
+                  }
+                />
+              </FormControl>
+            </Grid>
+            <Grid item xs={12} sm={6} lg={2}>
+              <FormControl className={classes.formControl}>
+                <TextField
+                  name='weight'
+                  label='Weight'
+                  variant='outlined'
+                  inputRef={register}
+                  error={!!errors.weight}
+                  helperText={errors?.weight?.message}
+                />
+              </FormControl>
+            </Grid>
+            <Grid item xs={12} sm={6} lg={2}>
+              <FormControl className={classes.formControl}>
+                <TextField
+                  name='length'
+                  label='Length'
+                  variant='outlined'
+                  inputRef={register}
+                  error={!!errors.length}
+                  helperText={errors?.length?.message}
+                />
+              </FormControl>
+            </Grid>
+            <Grid item xs={12} sm={6} lg={2}>
+              <FormControl className={classes.formControl}>
+                <TextField
+                  name='width'
+                  label='Width'
+                  variant='outlined'
+                  inputRef={register}
+                  error={!!errors.width}
+                  helperText={errors?.width?.message}
+                />
+              </FormControl>
+            </Grid>
+            <Grid item xs={12} sm={6} lg={2}>
+              <FormControl className={classes.formControl}>
+                <TextField
+                  name='height'
+                  label='Height'
+                  variant='outlined'
+                  inputRef={register}
+                  error={!!errors.height}
+                  helperText={errors?.height?.message}
+                />
+              </FormControl>
+            </Grid>
             <Grid item xs={12}>
               <FormControl className={classes.formControl}>
                 <TextField
@@ -291,6 +373,8 @@ const AddBookForm = ({ isDialogOpen }:AddBookFormProps) => {
                   multiline
                   rows={4}
                   inputRef={register}
+                  error={!!errors.description}
+                  helperText={errors?.description?.message}
                 />
               </FormControl>
             </Grid>
@@ -301,6 +385,8 @@ const AddBookForm = ({ isDialogOpen }:AddBookFormProps) => {
                   label='Retail price'
                   variant='outlined'
                   inputRef={register}
+                  error={!!errors.retailPrice}
+                  helperText={errors?.retailPrice?.message}
                 />
               </FormControl>
             </Grid>
@@ -311,6 +397,8 @@ const AddBookForm = ({ isDialogOpen }:AddBookFormProps) => {
                   label='Purchase price'
                   variant='outlined'
                   inputRef={register}
+                  error={!!errors.purchasePrice}
+                  helperText={errors?.purchasePrice?.message}
                 />
               </FormControl>
             </Grid>
@@ -324,6 +412,8 @@ const AddBookForm = ({ isDialogOpen }:AddBookFormProps) => {
                     shrink: true
                   }}
                   inputRef={register}
+                  error={!!errors.datePurchased}
+                  helperText={errors?.datePurchased?.message}
                 />
               </FormControl>
             </Grid>
@@ -334,6 +424,8 @@ const AddBookForm = ({ isDialogOpen }:AddBookFormProps) => {
                   label='Amount bought'
                   variant='outlined'
                   inputRef={register}
+                  error={!!errors.amountBought}
+                  helperText={errors?.amountBought?.message}
                 />
               </FormControl>
             </Grid>
@@ -348,12 +440,12 @@ const AddBookForm = ({ isDialogOpen }:AddBookFormProps) => {
                 alt={`Book cover`}
               />
             ) : (
-              <img
-                className={classes.coverImg}
-                src={`https://placeholder.pics/svg/200x250/FCFFC6-FFFFFF/Book%20Cover%20image`}
-                alt={`Book cover`}
-              />
-            )}
+                <img
+                  className={classes.coverImg}
+                  src={`https://placeholder.pics/svg/200x250/FCFFC6-FFFFFF/Book%20Cover%20image`}
+                  alt={`Book cover`}
+                />
+              )}
             <div
               style={{ padding: 20, display: 'flex', justifyContent: 'center' }}
             >
