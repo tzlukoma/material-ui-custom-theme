@@ -89,17 +89,10 @@ const schema = Yup.object().shape({
     .positive('Please enter a positive number')
     .integer('Please enter a number')
     .required(`The book's width is required`),
-  height: Yup.number().typeError(`Please enter a number`)
-    .positive('Please enter a positive number')
-    .integer('Please enter a number')
-    .required(`The book's height is required`),
-  retailPrice: Yup.number().typeError(`Please enter a number`)
-    .positive('Please enter a positive number')
-    .integer('Please enter a number')
+  height: Yup.string().required(`The book's height is required`),
+  retailPrice: Yup.string()
     .required('Amount bought is required'),
-  purchasePrice: Yup.number().typeError(`Please enter a number`)
-    .positive('Please enter a positive number')
-    .integer('Please enter a number')
+  purchasePrice: Yup.string()
     .required('Amount bought is required'),
   datePurchased: Yup.date().typeError(`Please enter a date`),
   amountBought: Yup.number().typeError(`Please enter a number`)
