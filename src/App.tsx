@@ -49,7 +49,7 @@ const App:React.FC = () => {
                   xs={12}
                   style={{ display: 'flex', paddingBottom: 5 }}
                 >
-                  <Typography variant='h3' style={{ paddingRight: 20 }}>
+                  <Typography variant='h4' style={{ paddingRight: 20 }}>
                     Book List
                   </Typography>
                   <Button onClick={handleOpen}>
