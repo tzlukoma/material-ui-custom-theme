@@ -46,6 +46,8 @@ interface AddBookFormProps {
 }
 
 interface BookSubmission {
+  author: string,
+  title: string,
   gender: string,
   ageRange: string,
   genderCategoryId: number,
@@ -181,8 +183,6 @@ const AddBookForm = ({ isDialogOpen }: AddBookFormProps) => {
     submitData['stockCount'] = submitData['amountBought']
     submitData['regularPrice'] = roundedSalePrice.toString()
 
-    console.log(`newSku`, newSku)
-    console.log(`submitData`, submitData)
 
     const booksRef = firestore.collection('books').doc(submitData['sku'])
 
@@ -364,7 +364,7 @@ const AddBookForm = ({ isDialogOpen }: AddBookFormProps) => {
                   label='Description'
                   variant='outlined'
                   multiline
-                  rows={4}
+                  rows={8}
                   inputRef={register}
                   error={!!errors.description}
                   helperText={errors?.description?.message}

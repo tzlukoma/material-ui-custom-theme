@@ -14,6 +14,7 @@ import {
   ListItemAvatar,
   ListItemText
 } from '@material-ui/core'
+import Chip from '@material-ui/core/Chip';
 
 const useStyles = makeStyles(theme => ({
   listItem: {
@@ -31,7 +32,9 @@ interface Book {
   title: string,
   author: string,
   coverImage: string,
-  sku: string
+  sku: string,
+  stockCount: number,
+  regularPrice: string
 }
 
 
@@ -43,7 +46,7 @@ const BookList = () => {
   const query = booksRef.orderBy('createdAt', 'desc')
 
   const [books] = useCollectionData<Book>(query, { idField: 'id' })
-  books && console.log(books)
+
 
   return (
     <div>
@@ -55,13 +58,13 @@ const BookList = () => {
                 return (
 
 
-                  <Grid item xs={12} sm={6} lg={3}>
+                  <Grid item xs={12} sm={6} lg={4} key={book.id}>
                     <ListItem key={book.id} className={classes.listItem}>
                       <ListItemAvatar >
                         <img
                           src={book.coverImage}
                           alt={`Book cover`}
-                          style={{ width: 100, margin: 'auto', height: "auto" }}
+                          style={{ width: 150, margin: 'auto', height: "auto" }}
                         />
                       </ListItemAvatar>
                       <ListItemText
@@ -70,8 +73,14 @@ const BookList = () => {
                         }}
                       >
                         <Typography variant='h6'>{book.title}</Typography>
-                        <Typography>{`by ${book.author}`}</Typography>
+                        <Typography variant='body2'>{`by ${book.author}`}</Typography>
                         <Typography variant='caption'>{book.sku}</Typography>
+                        <Typography variant='h6' style={{ fontWeight: 700 }}>{book.regularPrice}</Typography>
+                        {
+                          book.stockCount > 0 ?
+                            <div style={{ marginTop: 5 }}><Chip label={`${book.stockCount} in stock`} color="secondary" size="small" /></div>
+                            : <div style={{ marginTop: 5 }}><Chip label={`out of stock`} size="small" /></div>
+                        }
                       </ListItemText>
                     </ListItem>
                   </Grid>
